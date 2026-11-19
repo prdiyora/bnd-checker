@@ -67,6 +67,7 @@ function render(data) {
           <span class="pill ${status}">${status === 'up' ? 'Up' : status === 'down' ? 'Down' : 'Checking'}</span>
         </div>
         <p class="mon-url">${esc(m.url)} · every ${m.intervalMin} min</p>
+        ${(m.links ?? []).length ? `<p class="mon-links">${m.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
         <div class="stats">
           <div class="stat"><div class="num">${m.uptime24h == null ? '—' : m.uptime24h + '%'}</div><div class="lbl">Uptime 24h</div></div>
           <div class="stat"><div class="num">${m.uptime7d == null ? '—' : m.uptime7d + '%'}</div><div class="lbl">Uptime 7d</div></div>

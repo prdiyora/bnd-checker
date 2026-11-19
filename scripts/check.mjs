@@ -190,6 +190,7 @@ async function main() {
       id: monitor.id,
       name: monitor.name,
       url: monitor.url,
+      links: monitor.links ?? [],
       intervalMin: monitor.intervalMin ?? 5,
       status: st.status,
       since: st.since,
