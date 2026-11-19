@@ -32,6 +32,7 @@ jobs:
         run: node scripts/check.mjs
 
       - name: Commit monitoring data
+        if: always()
         run: |
           git config user.name "bnd-checker[bot]"
           git config user.email "bnd-checker[bot]@users.noreply.github.com"

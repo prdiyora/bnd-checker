@@ -83,11 +83,17 @@ async function sendMail(subject, text) {
   const to = process.env.ALERT_TO ?? process.env.GMAIL_USER;
   if (DRY_RUN) {
     console.log(`[dry-run] mail to ${to}: ${subject}`);
-    return;
+    return true;
   }
-  const t = await getTransporter();
-  await t.sendMail({ from: `BND checker <${process.env.GMAIL_USER}>`, to, subject, text });
-  console.log(`mail sent to ${to}: ${subject}`);
+  try {
+    const t = await getTransporter();
+    await t.sendMail({ from: `BND checker <${process.env.GMAIL_USER}>`, to, subject, text });
+    console.log(`mail sent to ${to}: ${subject}`);
+    return true;
+  } catch (err) {
+    console.error(`mail failed (${err.message}); state change held, will retry on the next run`);
+    return false;
+  }
 }
 
 async function main() {
@@ -116,17 +122,11 @@ async function main() {
     await mkdir(path.join(DATA, 'history'), { recursive: true });
     await writeFile(histFile, JSON.stringify(history));
 
-    // status change -> incident + email
+    // status change -> incident + email. The transition is only recorded once
+    // the alert mail actually went out, so a mail failure is retried next run.
     const prev = st.status;
     if (status === 'down' && prev !== 'down') {
-      incidents.push({
-        monitorId: monitor.id,
-        name: monitor.name,
-        start: now.toISOString(),
-        end: null,
-        reason: result.error ?? 'no response',
-      });
-      await sendMail(
+      const mailed = await sendMail(
         `DOWN: ${monitor.name}`,
         [
           `${monitor.name} is DOWN.`,
@@ -138,14 +138,19 @@ async function main() {
           `BND checker will mail you again when it comes back up.`,
         ].join('\n'),
       );
+      if (!mailed) continue;
+      incidents.push({
+        monitorId: monitor.id,
+        name: monitor.name,
+        start: now.toISOString(),
+        end: null,
+        reason: result.error ?? 'no response',
+      });
     } else if (status === 'up' && prev === 'down') {
       const open = incidents.findLast((i) => i.monitorId === monitor.id && !i.end);
       let downtime = '';
-      if (open) {
-        open.end = now.toISOString();
-        downtime = fmtDuration(new Date(open.end) - new Date(open.start));
-      }
-      await sendMail(
+      if (open) downtime = fmtDuration(now - new Date(open.start));
+      const mailed = await sendMail(
         `UP again: ${monitor.name}`,
         [
           `${monitor.name} is back UP.`,
@@ -157,6 +162,8 @@ async function main() {
           `- BND checker`,
         ].filter(Boolean).join('\n'),
       );
+      if (!mailed) continue;
+      if (open) open.end = now.toISOString();
     }
 
     state.monitors[monitor.id] = {
