@@ -45,3 +45,4 @@ Append to `data/monitors.json`:
 npm ci
 DRY_RUN=1 node scripts/check.mjs
 ```
+
