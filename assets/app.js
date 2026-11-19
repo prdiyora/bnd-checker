@@ -70,7 +70,7 @@ function render(data) {
         <div class="stats">
           <div class="stat"><div class="num">${m.uptime24h == null ? '—' : m.uptime24h + '%'}</div><div class="lbl">Uptime 24h</div></div>
           <div class="stat"><div class="num">${m.uptime7d == null ? '—' : m.uptime7d + '%'}</div><div class="lbl">Uptime 7d</div></div>
-          <div class="stat"><div class="num">${m.lastLatencyMs == null ? '—' : m.lastLatencyMs + ' ms'}</div><div class="lbl">Response</div></div>
+          <div class="stat"><div class="num">${m.status === 'down' && m.lastError ? esc(m.lastError) : m.lastLatencyMs == null ? '—' : m.lastLatencyMs + ' ms'}</div><div class="lbl">Response</div></div>
           <div class="stat"><div class="num">${fmtTime(m.since)}</div><div class="lbl">${status === 'down' ? 'Down since' : 'Up since'}</div></div>
         </div>
         ${heartbeatBars(m.heartbeats)}
