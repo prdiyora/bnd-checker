@@ -84,8 +84,8 @@ function monitorCard(m) {
       <div class="mon-head">
         <div>
           <div class="mon-name"><span class="status-dot ${status}"></span>${esc(m.name)}</div>
-          <p class="mon-url" title="${esc(m.url)}">${esc(m.url)}</p>
-          ${(m.links ?? []).length ? `<p class="mon-links">${m.links.map((l) => `<a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
+          <a class="mon-url" href="${esc(m.url)}" target="_blank" rel="noopener" title="${esc(m.url)}">${esc(m.url)}</a>
+          ${(m.links ?? []).length ? `<p class="mon-links">${m.links.map((l) => `<a class="btn${/base/i.test(l.label) ? ' primary' : ''}" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`).join('')}</p>` : ''}
         </div>
         <span class="pill ${status}">${status === 'up' ? 'Up' : status === 'down' ? 'Down' : 'Checking'}</span>
       </div>
@@ -130,15 +130,16 @@ function incidentsSection(monitors) {
   box.hidden = false;
   const shown = incidentsExpanded ? all : all.slice(0, 5);
   box.innerHTML = `
-    <h2>Recent incidents</h2>
+    <h2>Alerts &amp; incidents</h2>
+    <p class="inc-note">The same DOWN / UP events that go out by email.</p>
     ${shown.map((i) => {
       const open = !i.end;
       const span = open
-        ? `${fmtTime(i.start)} · ongoing (${fmtDuration(i.start)})`
-        : `${fmtTime(i.start)} · ${fmtDuration(i.start, i.end)}`;
+        ? `since ${fmtTime(i.start)} · ongoing (${fmtDuration(i.start)})`
+        : `${fmtTime(i.start)} → ${fmtTime(i.end)} · was down ${fmtDuration(i.start, i.end)}`;
       return `<div class="incident">
         <span class="inc-dot ${open ? 'down' : 'up'}"></span>
-        <span><strong>${open ? 'Down' : 'Recovered'}</strong> <span class="mon">${esc(i.name ?? i.monitorId)}</span> · <span class="when">${span}</span>${i.reason ? ` · ${esc(i.reason)}` : ''}</span>
+        <span><strong>${open ? 'DOWN' : 'UP again'}</strong> <span class="mon">${esc(i.name ?? i.monitorId)}</span> · <span class="when">${span}</span>${i.reason ? ` · ${esc(i.reason)}` : ''}</span>
       </div>`;
     }).join('')}
     ${all.length > 5 ? `<button class="show-more" id="show-more">${incidentsExpanded ? 'Show less' : `Show all ${all.length}`}</button>` : ''}`;

@@ -108,16 +108,21 @@ h1 { font-size: 17px; font-weight: 650; margin: 0; letter-spacing: -0.2px; }
 .status-dot.pending { background: var(--amber); }
 @media (prefers-reduced-motion: reduce) { .status-dot.up { animation: none; } }
 .mon-url {
-  color: var(--muted); font-size: 13px; margin: 5px 0 0;
+  display: block; color: var(--muted); font-size: 13px; margin: 5px 0 0; text-decoration: none;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 340px;
 }
-.mon-links { display: flex; gap: 8px; margin: 8px 0 0; flex-wrap: wrap; }
+.mon-url:hover { color: var(--accent); text-decoration: underline; }
+.mon-links { display: flex; gap: 10px; margin: 10px 0 0; flex-wrap: wrap; }
 .mon-links a {
-  color: var(--accent); font-size: 12px; text-decoration: none;
-  border: 1px solid var(--border); border-radius: 8px; padding: 2px 9px;
-  background: var(--raised);
+  color: var(--accent); font-size: 13px; font-weight: 600; text-decoration: none;
+  border: 1px solid var(--border); border-radius: 10px; padding: 9px 16px;
+  background: var(--raised); transition: border-color 150ms ease, background 150ms ease;
 }
 .mon-links a:hover { border-color: var(--accent); }
+.mon-links a.primary {
+  background: var(--accent); border-color: var(--accent); color: #0b0e14;
+}
+.mon-links a.primary:hover { filter: brightness(1.1); }
 
 .pill {
   font-size: 11px; font-weight: 650; letter-spacing: 0.4px;
@@ -160,7 +165,8 @@ h1 { font-size: 17px; font-weight: 650; margin: 0; letter-spacing: -0.2px; }
 
 /* incidents */
 .incidents { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; margin-bottom: 28px; }
-.incidents h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+.incidents h2 { font-size: 13px; font-weight: 600; letter-spacing: 0.7px; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+.inc-note { font-size: 12px; color: var(--muted); margin: 0 0 12px; opacity: 0.8; }
 .incident { display: flex; gap: 10px; align-items: baseline; font-size: 13px; padding: 8px 0; border-bottom: 1px dashed var(--border); }
 .incident:last-of-type { border-bottom: 0; }
 .inc-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; align-self: center; }
