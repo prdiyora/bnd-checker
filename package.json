@@ -1,0 +1,13 @@
+{
+  "name": "bnd-checker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BND checker - self-hosted uptime monitoring with email alerts",
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

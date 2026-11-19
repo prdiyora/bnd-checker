@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BND checker</title>
+  <meta name="description" content="BND checker - uptime monitoring with email alerts." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='42' fill='%2322c55e'/></svg>" />
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"></span>
+        <div>
+          <h1>BND checker</h1>
+          <p class="tag">Uptime monitoring, no limits.</p>
+        </div>
+      </div>
+      <p class="meta" id="updated">loading…</p>
+    </div>
+  </header>
+
+  <main class="wrap" id="app">
+    <p class="loading">Loading monitors…</p>
+  </main>
+
+  <footer class="wrap foot">
+    <p>Checks run every 5 minutes. DOWN and UP alerts go out by email.</p>
+  </footer>
+
+  <script src="assets/app.js" type="module"></script>
+</body>
+</html>

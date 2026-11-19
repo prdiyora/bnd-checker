@@ -1,0 +1,44 @@
+name: Uptime check
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: uptime-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - name: Run checks
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_TO: ${{ secrets.ALERT_TO }}
+        run: node scripts/check.mjs
+
+      - name: Commit monitoring data
+        run: |
+          git config user.name "bnd-checker[bot]"
+          git config user.email "bnd-checker[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "no data changes"
+          else
+            git commit -m "data: uptime check $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi

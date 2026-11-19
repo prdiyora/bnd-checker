@@ -1,0 +1,12 @@
+[
+  {
+    "id": "snapseller-backend",
+    "name": "SnapSeller Backend Health",
+    "url": "https://snapseller-java-backend-acbeeah7gzaddqbk.southindia-01.azurewebsites.net/api/health",
+    "method": "GET",
+    "expectStatus": 200,
+    "timeoutMs": 30000,
+    "intervalMin": 5,
+    "enabled": true
+  }
+]
