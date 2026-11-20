@@ -1,0 +1,10 @@
+{
+  "name": "BND checker",
+  "short_name": "BND",
+  "description": "Uptime monitoring with email alerts.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0e14",
+  "theme_color": "#0b0e14",
+  "icons": []
+}
