@@ -1,6 +1,8 @@
 // BND checker dashboard - reads the summary the checker commits to this repo.
 const SUMMARY_URL =
   'https://raw.githubusercontent.com/prdiyora/bnd-checker/main/data/summary.json';
+const HISTORY_URL = (id) =>
+  `https://raw.githubusercontent.com/prdiyora/bnd-checker/main/data/history/${id}.json`;
 
 const $ = (sel) => document.querySelector(sel);
 const BUCKETS = 48;                 // 48 x 30 min = 24 hours
@@ -29,6 +31,30 @@ function fmtDuration(start, end) {
   const mins = Math.round((new Date(end ?? Date.now()) - new Date(start)) / 60000);
   if (mins < 60) return `${mins} min`;
   return `${Math.floor(mins / 60)} h ${mins % 60} min`;
+}
+
+// IST calendar-day key, e.g. 2026-11-20. Days on the day log are IST days.
+function dayKey(t) {
+  return new Date(t).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+}
+
+function fmtDayLabel(key) {
+  return new Date(`${key}T12:00:00+05:30`).toLocaleDateString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+}
+
+function fmtClock(iso) {
+  return new Date(iso).toLocaleTimeString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
 }
 
 function esc(s) {
@@ -123,6 +149,66 @@ function summaryStrip(monitors) {
 }
 
 let incidentsExpanded = false;
+let lastData = null;
+const histories = {};               // monitor id -> [{t, s, ms}] from data/history/
+const daylogDay = {};               // monitor id -> 'today' | 'yesterday'
+
+function renderDaylog() {
+  const box = $('#daylog');
+  if (!lastData?.monitors?.length) { box.hidden = true; return; }
+  const todayK = dayKey(Date.now());
+  const yestK = dayKey(Date.now() - 24 * 3600 * 1000);
+  box.hidden = false;
+  box.innerHTML = `
+    <h2>Full day log</h2>
+    <p class="inc-note">Every single check, saved. Pick a day to see the complete record.</p>
+    ${lastData.monitors.map((m) => {
+      const mode = daylogDay[m.id] ?? 'today';
+      const key = mode === 'today' ? todayK : yestK;
+      const entries = (histories[m.id] ?? m.heartbeats ?? []).filter((e) => dayKey(e.t) === key);
+      entries.sort((a, b) => new Date(b.t) - new Date(a.t));
+      const up = entries.filter((e) => e.s === 'up').length;
+      const down = entries.length - up;
+      const pct = entries.length ? ((100 * up) / entries.length).toFixed(1) : null;
+      const rows = entries.map((e) => {
+        const bad = e.s !== 'up';
+        const resp = bad && e.ms >= 30000 ? 'timeout' : e.ms == null ? '—' : `${e.ms} ms`;
+        return `<tr class="${bad ? 'dl-down' : ''}">
+          <td>${fmtClock(e.t)}</td>
+          <td><span class="pill ${bad ? 'down' : 'up'}">${bad ? 'Down' : 'Up'}</span></td>
+          <td>${resp}</td>
+        </tr>`;
+      }).join('');
+      return `<div class="dl-mon">
+        <div class="dl-head">
+          <span class="dl-name">${esc(m.name)}</span>
+          <span class="dl-tabs">
+            <button class="dl-tab${mode === 'today' ? ' active' : ''}" data-mon="${esc(m.id)}" data-day="today">Today</button>
+            <button class="dl-tab${mode === 'yesterday' ? ' active' : ''}" data-mon="${esc(m.id)}" data-day="yesterday">Yesterday</button>
+          </span>
+        </div>
+        <div class="dl-chips">
+          <div class="dl-chip"><div class="num">${entries.length}</div><div class="lbl">Checks</div></div>
+          <div class="dl-chip"><div class="num ok">${up}</div><div class="lbl">Up</div></div>
+          <div class="dl-chip"><div class="num ${down ? 'bad' : ''}">${down}</div><div class="lbl">Down</div></div>
+          <div class="dl-chip"><div class="num">${pct == null ? '—' : pct + '%'}</div><div class="lbl">Uptime</div></div>
+        </div>
+        ${entries.length
+          ? `<div class="dl-scroll"><table class="dl-table">
+              <thead><tr><th>Time (IST)</th><th>Status</th><th>Response</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table></div>
+            <p class="dl-note">${fmtDayLabel(key)} · ${entries.length} checks · newest first. 7 days of checks stay on the site; the repo keeps every check forever.</p>`
+          : `<p class="empty">No checks recorded for ${fmtDayLabel(key)}.</p>`}
+      </div>`;
+    }).join('')}`;
+  box.querySelectorAll('.dl-tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      daylogDay[btn.dataset.mon] = btn.dataset.day;
+      renderDaylog();
+    });
+  });
+}
 function incidentsSection(monitors) {
   const all = monitors.flatMap((m) => (m.incidents ?? [])).sort((a, b) => new Date(b.start) - new Date(a.start));
   const box = $('#incidents');
@@ -152,13 +238,21 @@ function render(data) {
   summaryStrip(data.monitors);
   $('#app').innerHTML = data.monitors.map(monitorCard).join('');
   incidentsSection(data.monitors);
+  renderDaylog();
 }
 
 async function load() {
   try {
     const res = await fetch(`${SUMMARY_URL}?t=${Date.now()}`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    render(await res.json());
+    lastData = await res.json();
+    await Promise.all(lastData.monitors.map(async (m) => {
+      try {
+        const r = await fetch(`${HISTORY_URL(m.id)}?t=${Date.now()}`, { cache: 'no-store' });
+        if (r.ok) histories[m.id] = await r.json();
+      } catch { /* keep whatever history we had */ }
+    }));
+    render(lastData);
   } catch (err) {
     $('#app').innerHTML = `<p class="empty">Could not load monitoring data yet (${esc(err.message)}). The first check may still be running.</p>`;
   }
