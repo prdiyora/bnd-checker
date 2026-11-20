@@ -24,6 +24,7 @@
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
+html, body { overflow-x: clip; }
 body {
   margin: 0;
   background: var(--bg);
@@ -97,11 +98,12 @@ h1 { font-size: 16px; font-weight: 650; margin: 0; letter-spacing: -0.2px; line-
 
 /* ---------- quick action buttons ---------- */
 .quick-actions {
-  display: grid; grid-template-columns: 1fr; gap: 12px;
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px;
   margin-bottom: 20px;
 }
-@media (min-width: 600px) { .quick-actions { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 600px) { .quick-actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .qa-btn {
+  overflow: hidden;
   display: flex; align-items: center; gap: 12px;
   min-height: 56px; padding: 10px 16px;
   background: var(--raised); border: 1px solid var(--border); border-radius: 14px;
