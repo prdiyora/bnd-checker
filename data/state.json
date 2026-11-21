@@ -3,8 +3,8 @@
     "snapseller-backend": {
       "status": "up",
       "since": "2026-11-21T00:55:34.124Z",
-      "lastCheck": "2026-11-21T09:10:48.067Z",
-      "lastLatencyMs": 919,
+      "lastCheck": "2026-11-21T09:15:46.180Z",
+      "lastLatencyMs": 1056,
       "lastError": null
     }
   }
