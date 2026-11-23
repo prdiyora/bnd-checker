@@ -110,5 +110,12 @@
     "start": "2026-11-23T19:10:49.553Z",
     "end": "2026-11-23T19:20:47.983Z",
     "reason": "timeout"
+  },
+  {
+    "monitorId": "snapseller-backend",
+    "name": "SnapSeller Backend Health",
+    "start": "2026-11-23T19:40:47.709Z",
+    "end": null,
+    "reason": "timeout"
   }
 ]
