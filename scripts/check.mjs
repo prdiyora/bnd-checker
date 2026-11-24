@@ -9,6 +9,8 @@ const DATA = path.join(ROOT, 'data');
 const HISTORY_KEEP = 2016;          // 7 days at 5-minute checks
 const RETRY_DELAY_MS = 20_000;      // confirm a failure once before calling it DOWN
 const DRY_RUN = process.env.DRY_RUN === '1';
+// Email alerts are off by default (owner request 24 Nov 2026). Set MAIL_ALERTS=on to bring them back.
+const MAIL_OFF = process.env.MAIL_ALERTS !== 'on';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -81,6 +83,10 @@ async function getTransporter() {
 
 async function sendMail(subject, text) {
   const to = process.env.ALERT_TO ?? process.env.GMAIL_USER;
+  if (MAIL_OFF) {
+    console.log(`[mail off] ${subject}`);
+    return true;
+  }
   if (DRY_RUN) {
     console.log(`[dry-run] mail to ${to}: ${subject}`);
     return true;
