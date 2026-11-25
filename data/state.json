@@ -1,11 +1,11 @@
 {
   "monitors": {
     "snapseller-backend": {
-      "status": "up",
-      "since": "2026-11-25T07:31:00.765Z",
-      "lastCheck": "2026-11-25T08:01:13.858Z",
-      "lastLatencyMs": 975,
-      "lastError": null
+      "status": "down",
+      "since": "2026-11-25T08:10:47.620Z",
+      "lastCheck": "2026-11-25T08:10:47.620Z",
+      "lastLatencyMs": 30001,
+      "lastError": "timeout"
     }
   }
 }
